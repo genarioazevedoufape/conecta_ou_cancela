@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conecta ou Cancela</title>
+  <style>
+    :root {
+      --bg1: #0f172a;
+      --bg2: #1e293b;
+      --card: rgba(255,255,255,0.08);
+      --card-strong: rgba(255,255,255,0.14);
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --accent: #38bdf8;
+      --accent-2: #a78bfa;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --shadow: 0 10px 30px rgba(0,0,0,0.25);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,0.18), transparent 30%),
+        radial-gradient(circle at top right, rgba(167,139,250,0.18), transparent 26%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      min-height: 100vh;
+    }
+
+    .container {
+      width: min(1200px, calc(100% - 24px));
+      margin: 20px auto 40px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(56,189,248,0.18), rgba(167,139,250,0.18));
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: var(--shadow);
+      border-radius: 28px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -40px -40px auto;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      filter: blur(8px);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      line-height: 1;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 760px;
+      line-height: 1.6;
+    }
+
+    .topbar {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 12px;
+    }
+
+    .stat, .panel, .card, .end-screen {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .stat {
+      border-radius: 20px;
+      padding: 14px 16px;
+    }
+
+    .stat .label {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-bottom: 8px;
+    }
+
+    .stat .value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin: 20px 0 14px;
+    }
+
+    .left-controls, .right-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .panel {
+      border-radius: 20px;
+      padding: 12px 14px;
+    }
+
+    select, button {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 0.98rem;
+      font-weight: 700;
+    }
+
+    select {
+      background: rgba(255,255,255,0.95);
+      color: #0f172a;
+      min-width: 190px;
+      cursor: pointer;
+    }
+
+    button {
+      cursor: pointer;
+      transition: transform 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    button:hover { transform: translateY(-2px); }
+    button:active { transform: translateY(1px) scale(0.99); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      box-shadow: 0 10px 24px rgba(56,189,248,0.25);
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.12);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .message {
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 14px 18px;
+      border-radius: 18px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .message.success { color: #dcfce7; background: rgba(34,197,94,0.18); }
+    .message.error { color: #fee2e2; background: rgba(239,68,68,0.18); }
+    .message.info { color: #e0f2fe; background: rgba(56,189,248,0.16); }
+
+    .game-board {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .column {
+      border-radius: 24px;
+      padding: 18px;
+    }
+
+    .column h2 {
+      margin: 0 0 14px;
+      font-size: 1.15rem;
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .card {
+      border-radius: var(--radius);
+      padding: 16px;
+      cursor: pointer;
+      position: relative;
+      min-height: 100px;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+      display: flex;
+      align-items: center;
+      line-height: 1.45;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      background: var(--card-strong);
+    }
+
+    .card .tag {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      font-size: 0.72rem;
+      background: rgba(255,255,255,0.11);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--muted);
+      padding: 6px 8px;
+      border-radius: 999px;
+    }
+
+    .card.selected {
+      outline: 2px solid var(--accent);
+      transform: translateY(-2px) scale(1.01);
+      background: rgba(56,189,248,0.16);
+    }
+
+    .card.matched {
+      cursor: default;
+      background: rgba(34,197,94,0.18);
+      outline: 2px solid rgba(34,197,94,0.55);
+    }
+
+    .card.wrong {
+      animation: shake 0.35s linear;
+      background: rgba(239,68,68,0.18);
+      outline: 2px solid rgba(239,68,68,0.45);
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-3px); }
+    }
+
+    .end-screen {
+      display: none;
+      margin-top: 18px;
+      border-radius: 28px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .end-screen.show { display: block; }
+
+    .trophy {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    .ranking {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .pill {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 700;
+    }
+
+    .footer-note {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 900px) {
+      .game-board, .topbar {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .left-controls, .right-controls {
+        width: 100%;
+      }
+
+      .left-controls > *, .right-controls > * {
+        flex: 1;
+      }
+
+      select, button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="hero">
+      <h1>🎯 Conecta ou Cancela</h1>
+      <p class="subtitle">
+        Aprendendo sobre respeito e cidadania digital. Associe conceitos, interprete situações e tome decisões conscientes.
+        Um jogo dinâmico e envolvente para desenvolver pensamento crítico no mundo digital.
+      </p>
+
+      <div class="topbar">
+        <div class="stat">
+          <div class="label">Pontuação</div>
+          <div class="value" id="score">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Tempo</div>
+          <div class="value" id="timer">90</div>
+        </div>
+        <div class="stat">
+          <div class="label">Acertos</div>
+          <div class="value" id="hits">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Erros</div>
+          <div class="value" id="mistakes">0</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="controls">
+      <div class="left-controls">
+        <div class="panel">
+          <label for="difficulty"><strong>Nível:</strong></label>
+          <select id="difficulty">
+            <option value="easy">Fácil (4 pares / 120s)</option>
+            <option value="medium" selected>Médio (6 pares / 90s)</option>
+            <option value="hard">Difícil (10 pares / 75s)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="right-controls">
+        <button class="btn-primary" id="startBtn">▶ Iniciar jogo</button>
+        <button class="btn-secondary" id="restartBtn">🔄 Reiniciar</button>
+      </div>
+    </section>
+
+    <div class="message info" id="message">Clique em “Iniciar jogo” para começar.</div>
+
+    <section class="game-board">
+      <div class="column panel">
+        <h2>📌 Conceitos</h2>
+        <div class="grid" id="conceptsGrid"></div>
+      </div>
+
+      <div class="column panel">
+        <h2>🧠 Definições</h2>
+        <div class="grid" id="definitionsGrid"></div>
+      </div>
+    </section>
+
+    <section class="end-screen" id="endScreen">
+      <div class="trophy">🏆</div>
+      <h2 id="endTitle">Fim de jogo!</h2>
+      <p id="endText"></p>
+      <div class="ranking">
+        <div class="pill" id="finalScore">Pontuação: 0</div>
+        <div class="pill" id="finalHits">Acertos: 0</div>
+        <div class="pill" id="finalMistakes">Erros: 0</div>
+      </div>
+      <div style="margin-top:18px;">
+        <button class="btn-primary" id="playAgainBtn">Jogar novamente</button>
+      </div>
+    </section>
+
+    <p class="footer-note">
+      Dica: selecione primeiro um conceito e depois a definição correspondente.
+      Você ganha mais pontos quando acerta em sequência.
+    </p>
+  </main>
+
+  <script>
+    const allPairs = [
+      {
+        concept: "Discurso de ódio",
+        definition: "Manifestação intensa de discriminação que ofende, humilha, ameaça e incentiva a violência, atingindo e violando os direitos humanos de indivíduos e comunidades, com base em seus marcadores sociais e identitários."
+      },
+      {
+        concept: "Misoginia",
+        definition: "É o ódio, o desprezo ou o preconceito contra mulheres, pelo simples fato de serem mulheres, reforçando desigualdades e discriminações."
+      },
+      {
+        concept: "Misoginia recreativa",
+        definition: "É quando piadas, memes, comentários ou brincadeiras usam o desprezo ou a humilhação de mulheres como forma de diversão."
+      },
+      {
+        concept: "Violência simbólica",
+        definition: "É um tipo de violência não física, que acontece por meio de palavras, ideias, símbolos, costumes ou regras sociais que fazem uma pessoa ou grupo se sentir inferior, desvalorizado ou sem voz. Não usa força, mas atua de forma sutil, muitas vezes sendo vista como normal ou natural."
+      },
+      {
+        concept: "Liberdade de expressão",
+        definition: "É o direito de toda pessoa manifestar suas ideias, opiniões, pensamentos e sentimentos, por meio da fala, da escrita, da arte ou de outros meios, respeitando os direitos e a dignidade dos outros."
+      },
+      {
+        concept: "Red Pill",
+        definition: "Define-se como movimento traduzido como pílula vermelha, inspirado no filme Matrix. Homens defendem a masculinidade dominante e acusam mulheres pela culpa da queda de valores associados à masculinidade, a exemplo da virilidade."
+      },
+      {
+        concept: "Cultura Incel",
+        definition: "Refere-se a um grupo de homens e meninos que se intitulam celibatários involuntários. Eles afirmam não conseguir estabelecer relações afetivo-sexuais e atribuem essa dificuldade às mulheres, alegando que elas preferem determinados estereótipos masculinos, como homens com padrão elevado de aparência, popularidade, poder aquisitivo e comportamento dominante."
+      },
+      {
+        concept: "Masculinidades plurais",
+        definition: "É a ideia de que não existe uma única forma de ser homem. Existem várias maneiras de viver a masculinidade, que mudam conforme a cultura, a época, a classe social, a sexualidade, a raça e as experiências de cada pessoa. Sendo assim, diferentes formas de ser homem devem ser respeitadas."
+      },
+      {
+        concept: "Educação crítica digital",
+        definition: "É o processo de ensinar e aprender a usar a internet, as redes sociais e as tecnologias digitais de forma consciente, responsável e reflexiva. É aprender a pensar criticamente sobre o que vemos, consumimos e fazemos no mundo digital, usando a tecnologia de forma ética e cidadã."
+      },
+      {
+        concept: "Violência digital",
+        definition: "É qualquer forma de agressão, ameaça, humilhação, perseguição ou discriminação praticada por meio da internet, redes sociais, aplicativos ou outras tecnologias digitais."
+      },
+      {
+        concept: "Estereótipos de gênero",
+        definition: "São ideias generalizadas e simplificadas que dizem como homens e mulheres devem ser, agir ou sentir, sem considerar as diferenças individuais. Considera-se rótulos sociais que prendem pessoas a expectativas rígidas, contribuindo para preconceito e exclusão."
+      }
+    ];
+
+    const difficultySettings = {
+      easy: { pairs: 4, time: 120 },
+      medium: { pairs: 6, time: 90 },
+      hard: { pairs: 10, time: 75 }
+    };
+
+    const conceptsGrid = document.getElementById('conceptsGrid');
+    const definitionsGrid = document.getElementById('definitionsGrid');
+    const scoreEl = document.getElementById('score');
+    const timerEl = document.getElementById('timer');
+    const hitsEl = document.getElementById('hits');
+    const mistakesEl = document.getElementById('mistakes');
+    const messageEl = document.getElementById('message');
+    const difficultyEl = document.getElementById('difficulty');
+    const endScreen = document.getElementById('endScreen');
+    const endTitle = document.getElementById('endTitle');
+    const endText = document.getElementById('endText');
+    const finalScore = document.getElementById('finalScore');
+    const finalHits = document.getElementById('finalHits');
+    const finalMistakes = document.getElementById('finalMistakes');
+
+    let gamePairs = [];
+    let selectedConcept = null;
+    let selectedDefinition = null;
+    let matchedCount = 0;
+    let score = 0;
+    let hits = 0;
+    let mistakes = 0;
+    let streak = 0;
+    let timeLeft = 90;
+    let timer = null;
+    let gameActive = false;
+
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function updateStats() {
+      scoreEl.textContent = score;
+      timerEl.textContent = timeLeft;
+      hitsEl.textContent = hits;
+      mistakesEl.textContent = mistakes;
+    }
+
+    function setMessage(text, type = 'info') {
+      messageEl.textContent = text;
+      messageEl.className = `message ${type}`;
+    }
+
+    function resetSelections() {
+      selectedConcept = null;
+      selectedDefinition = null;
+      document.querySelectorAll('.card.selected').forEach(card => card.classList.remove('selected'));
+    }
+
+    function createCard(text, type, id) {
+      const btn = document.createElement('button');
+      btn.className = 'card';
+      btn.dataset.type = type;
+      btn.dataset.id = id;
+      if(type === 'concept'){
+        btn.innerHTML = `<span class="tag">conceito</span>${text}`;
+      } else {
+        btn.innerHTML = text; // remove tag para melhorar leitura
+      }
+
+      btn.addEventListener('click', () => {
+        if (!gameActive || btn.classList.contains('matched')) return;
+
+        if (type === 'concept') {
+          document.querySelectorAll('.card[data-type="concept"]').forEach(c => c.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedConcept = btn;
+        } else {
+          document.querySelectorAll('.card[data-type="definition"]').forEach(c => c.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedDefinition = btn;
+        }
+
+        if (selectedConcept && selectedDefinition) {
+          checkMatch();
+        }
+      });
+
+      return btn;
+    }
+
+    function renderBoard() {
+      conceptsGrid.innerHTML = '';
+      definitionsGrid.innerHTML = '';
+
+      const concepts = shuffle(gamePairs.map(item => ({ id: item.id, text: item.concept })));
+      const definitions = shuffle(gamePairs.map(item => ({ id: item.id, text: item.definition })));
+
+      concepts.forEach(item => conceptsGrid.appendChild(createCard(item.text, 'concept', item.id)));
+      definitions.forEach(item => definitionsGrid.appendChild(createCard(item.text, 'definition', item.id)));
+    }
+
+    function checkMatch() {
+      const conceptId = selectedConcept.dataset.id;
+      const definitionId = selectedDefinition.dataset.id;
+
+      if (conceptId === definitionId) {
+        selectedConcept.classList.remove('selected');
+        selectedDefinition.classList.remove('selected');
+        selectedConcept.classList.add('matched');
+        selectedDefinition.classList.add('matched');
+
+        matchedCount++;
+        hits++;
+        streak++;
+        score += 100 + (streak - 1) * 20;
+
+        setMessage(`✅ Boa! Associação correta. Combo atual: ${streak}x`, 'success');
+        resetSelections();
+        updateStats();
+
+        if (matchedCount === gamePairs.length) {
+          endGame(true);
+        }
+      } else {
+        mistakes++;
+        streak = 0;
+        score = Math.max(0, score - 30);
+
+        selectedConcept.classList.add('wrong');
+        selectedDefinition.classList.add('wrong');
+        setMessage('❌ Não foi dessa vez. Tente outra associação.', 'error');
+        updateStats();
+
+        const wrongConcept = selectedConcept;
+        const wrongDefinition = selectedDefinition;
+
+        setTimeout(() => {
+          wrongConcept.classList.remove('wrong', 'selected');
+          wrongDefinition.classList.remove('wrong', 'selected');
+        }, 500);
+
+        selectedConcept = null;
+        selectedDefinition = null;
+      }
+    }
+
+    function startTimer() {
+      clearInterval(timer);
+      timer = setInterval(() => {
+        timeLeft--;
+        updateStats();
+
+        if (timeLeft <= 15 && timeLeft > 0) {
+          setMessage(`⏳ Atenção! Restam apenas ${timeLeft} segundos!`, 'info');
+        }
+
+        if (timeLeft <= 0) {
+          endGame(false);
+        }
+      }, 1000);
+    }
+
+    let lastUsedConcepts = [];
+
+    function startGame() {
+      const level = difficultyEl.value;
+      const settings = difficultySettings[level];
+      let shuffled = shuffle(allPairs);
+
+      // evitar repetir exatamente o mesmo conjunto da execução anterior
+      let attempt = 0;
+      let shuffledPairs;
+      do {
+        shuffled = shuffle(allPairs);
+        shuffledPairs = shuffled.slice(0, settings.pairs);
+        attempt++;
+      } while (
+        JSON.stringify(shuffledPairs.map(p => p.concept).sort()) === JSON.stringify(lastUsedConcepts.sort())
+        && attempt < 5
+      );
+
+      lastUsedConcepts = shuffledPairs.map(p => p.concept);
+
+      gamePairs = shuffledPairs.map((item, index) => ({ ...item, id: String(index + 1) }));
+      matchedCount = 0;
+      score = 0;
+      hits = 0;
+      mistakes = 0;
+      streak = 0;
+      timeLeft = settings.time;
+      gameActive = true;
+      endScreen.classList.remove('show');
+
+      resetSelections();
+      renderBoard();
+      updateStats();
+      setMessage('🚀 Jogo iniciado! Escolha um conceito e depois a definição correta.', 'info');
+      startTimer();
+    }
+
+    function endGame(completed) {
+      clearInterval(timer);
+      gameActive = false;
+      resetSelections();
+
+      finalScore.textContent = `Pontuação: ${score}`;
+      finalHits.textContent = `Acertos: ${hits}`;
+      finalMistakes.textContent = `Erros: ${mistakes}`;
+
+      if (completed) {
+        const bonus = timeLeft * 5;
+        score += bonus;
+        scoreEl.textContent = score;
+        finalScore.textContent = `Pontuação: ${score}`;
+        endTitle.textContent = 'Parabéns! Você venceu!';
+        endText.textContent = `Você associou todos os pares e ainda ganhou ${bonus} pontos de bônus pelo tempo restante.`;
+        setMessage('🏆 Excelente! Você completou o desafio.', 'success');
+      } else {
+        endTitle.textContent = 'Tempo esgotado!';
+        endText.textContent = 'O tempo acabou, mas você pode tentar novamente e bater sua pontuação.';
+        setMessage('⌛ Fim de jogo. Reinicie para jogar outra vez.', 'error');
+      }
+
+      endScreen.classList.add('show');
+    }
+
+    document.getElementById('startBtn').addEventListener('click', startGame);
+    document.getElementById('restartBtn').addEventListener('click', startGame);
+    document.getElementById('playAgainBtn').addEventListener('click', () => {
+      clearInterval(timer);
+      gameActive = false;
+      endScreen.classList.remove('show');
+      startGame();
+    });
+
+    updateStats();
+  
+    const scenarioBank = [
+      {
+        situation: "Em um grupo de mensagens, algumas pessoas começam a compartilhar frases que humilham um grupo social e incentivam agressões contra essas pessoas.",
+        options: ["Liberdade de expressão", "Discurso de ódio", "Educação crítica digital", "Masculinidades plurais"],
+        answer: "Discurso de ódio",
+        explanation: "Nesse caso há ofensa, humilhação e incentivo à violência contra um grupo, o que caracteriza discurso de ódio."
+      },
+      {
+        situation: "Um influenciador afirma que mulheres são inferiores e culpadas por vários problemas sociais apenas por serem mulheres.",
+        options: ["Misoginia", "Violência digital", "Red Pill", "Estereótipos de gênero"],
+        answer: "Misoginia",
+        explanation: "O foco é o desprezo e o preconceito contra mulheres pelo fato de serem mulheres."
+      },
+      {
+        situation: "Durante uma live, participantes fazem piadas e memes para ridicularizar mulheres e tratam isso como diversão.",
+        options: ["Misoginia recreativa", "Violência simbólica", "Liberdade de expressão", "Cultura Incel"],
+        answer: "Misoginia recreativa",
+        explanation: "Quando a humilhação de mulheres vira brincadeira ou entretenimento, trata-se de misoginia recreativa."
+      },
+      {
+        situation: "Na escola, repetem que meninos não podem chorar e meninas devem sempre ser delicadas, como se isso fosse natural.",
+        options: ["Educação crítica digital", "Estereótipos de gênero", "Discurso de ódio", "Violência digital"],
+        answer: "Estereótipos de gênero",
+        explanation: "A situação impõe expectativas rígidas sobre como homens e mulheres devem agir ou sentir."
+      },
+      {
+        situation: "Uma postagem usa palavras, símbolos e ideias para fazer certos estudantes se sentirem inferiores, mesmo sem agressão física.",
+        options: ["Violência simbólica", "Masculinidades plurais", "Liberdade de expressão", "Red Pill"],
+        answer: "Violência simbólica",
+        explanation: "A desvalorização acontece de forma sutil, por meio de ideias, palavras e símbolos."
+      },
+      {
+        situation: "Um estudante aprende a analisar conteúdos da internet, questionar fake news e usar redes sociais com responsabilidade.",
+        options: ["Violência digital", "Educação crítica digital", "Cultura Incel", "Misoginia"],
+        answer: "Educação crítica digital",
+        explanation: "A situação descreve o uso consciente, ético e reflexivo das tecnologias digitais."
+      },
+      {
+        situation: "Uma pessoa cria perfis falsos para perseguir, ameaçar e humilhar outra nas redes sociais.",
+        options: ["Violência digital", "Liberdade de expressão", "Masculinidades plurais", "Estereótipos de gênero"],
+        answer: "Violência digital",
+        explanation: "A agressão acontece por meio da internet e das tecnologias digitais."
+      },
+      {
+        situation: "Em um debate, alguém defende que existem várias formas legítimas de ser homem, sem impor um único modelo.",
+        options: ["Masculinidades plurais", "Red Pill", "Cultura Incel", "Misoginia recreativa"],
+        answer: "Masculinidades plurais",
+        explanation: "A fala reconhece diferentes maneiras de viver a masculinidade com respeito."
+      },
+      {
+        situation: "Um fórum reúne homens que culpam mulheres por não conseguirem se relacionar afetivamente e dizem que elas só escolhem certos padrões masculinos.",
+        options: ["Cultura Incel", "Violência simbólica", "Liberdade de expressão", "Educação crítica digital"],
+        answer: "Cultura Incel",
+        explanation: "A descrição corresponde ao grupo que se identifica como celibatário involuntário e responsabiliza mulheres por isso."
+      },
+      {
+        situation: "Um criador de conteúdo diz que os homens precisam recuperar uma masculinidade dominante e culpa as mulheres pela perda desses valores.",
+        options: ["Red Pill", "Masculinidades plurais", "Misoginia", "Discurso de ódio"],
+        answer: "Red Pill",
+        explanation: "A situação reflete a ideia de defesa da masculinidade dominante associada ao movimento Red Pill."
+      },
+      {
+        situation: "Uma pessoa expõe sua opinião em público, mas sem atacar a dignidade nem os direitos de outras pessoas.",
+        options: ["Liberdade de expressão", "Discurso de ódio", "Violência digital", "Misoginia recreativa"],
+        answer: "Liberdade de expressão",
+        explanation: "Manifestar ideias com respeito aos direitos e à dignidade alheia faz parte da liberdade de expressão."
+      }
+    ];
+
+    let currentPhase = 1;
+    let scenarioQuestions = [];
+    let currentScenarioIndex = 0;
+    let scenarioLocked = false;
+
+    const mainBoard = document.querySelector('.game-board');
+    const footerNote = document.querySelector('.footer-note');
+
+    const phaseSection = document.createElement('section');
+    phaseSection.className = 'panel';
+    phaseSection.style.marginTop = '18px';
+    phaseSection.style.borderRadius = '24px';
+    phaseSection.style.padding = '20px';
+    phaseSection.style.display = 'none';
+    phaseSection.innerHTML = `
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
+        <div>
+          <h2 style="margin:0 0 8px;">🎮 Fase 2 — Qual conceito está sendo aplicado?</h2>
+          <p style="margin:0;color:var(--muted);line-height:1.6;">Leia a situação e escolha o conceito correto.</p>
+        </div>
+        <div class="pill" id="scenarioProgress">Situação 1</div>
+      </div>
+      <div id="scenarioCard" class="card" style="cursor:default;min-height:140px;background:rgba(255,255,255,0.06);margin-bottom:14px;"></div>
+      <div id="scenarioOptions" class="grid"></div>
+      <div id="scenarioFeedback" style="margin-top:14px;font-weight:700;"></div>
+      <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;">
+        <button class="btn-primary" id="nextScenarioBtn" style="display:none;">Próxima situação</button>
+      </div>
+    `;
+    document.querySelector('.container').insertBefore(phaseSection, endScreen);
+
+    const scenarioProgress = () => document.getElementById('scenarioProgress');
+    const scenarioCard = () => document.getElementById('scenarioCard');
+    const scenarioOptions = () => document.getElementById('scenarioOptions');
+    const scenarioFeedback = () => document.getElementById('scenarioFeedback');
+    const nextScenarioBtn = () => document.getElementById('nextScenarioBtn');
+
+    let lastScenarioSet = [];
+
+    function buildScenarioPhase() {
+      const level = difficultyEl.value;
+      const amount = level === 'easy' ? 4 : level === 'medium' ? 6 : 8;
+      let attempt = 0;
+      do {
+        scenarioQuestions = shuffle(scenarioBank).slice(0, amount);
+        attempt++;
+      } while (
+        JSON.stringify(scenarioQuestions.map(q => q.situation).sort()) === JSON.stringify(lastScenarioSet.sort())
+        && attempt < 5
+      );
+
+      lastScenarioSet = scenarioQuestions.map(q => q.situation);
+      currentScenarioIndex = 0;
+      scenarioLocked = false;
+      renderScenario();
+      phaseSection.style.display = 'block';
+      mainBoard.style.display = 'none';
+      footerNote.textContent = 'Agora observe a situação, reflita e escolha o conceito correspondente.';
+      setMessage('🧩 Fase 2 liberada! Agora é hora de interpretar situações.', 'info');
+    }
+
+    function renderScenario() {
+      const item = scenarioQuestions[currentScenarioIndex];
+      scenarioLocked = false;
+      scenarioProgress().textContent = `Situação ${currentScenarioIndex + 1} de ${scenarioQuestions.length}`;
+      scenarioCard().innerHTML = `<strong>Situação:</strong><br><br>${item.situation}`;
+      scenarioFeedback().textContent = '';
+      nextScenarioBtn().style.display = 'none';
+      scenarioOptions().innerHTML = '';
+
+      shuffle(item.options).forEach(option => {
+        const btn = document.createElement('button');
+        btn.className = 'card';
+        btn.style.textAlign = 'left';
+        btn.innerHTML = `<span class="tag">opção</span>${option}`;
+        btn.addEventListener('click', () => evaluateScenario(btn, item, option));
+        scenarioOptions().appendChild(btn);
+      });
+    }
+
+    function evaluateScenario(button, item, option) {
+      if (scenarioLocked || !gameActive) return;
+      scenarioLocked = true;
+
+      const buttons = [...scenarioOptions().querySelectorAll('.card')];
+      buttons.forEach(btn => btn.style.cursor = 'default');
+
+      if (option === item.answer) {
+        button.classList.add('matched');
+        hits++;
+        streak++;
+        score += 120 + (streak - 1) * 25;
+        scenarioFeedback().textContent = `✅ Correto! ${item.explanation}`;
+        scenarioFeedback().style.color = '#dcfce7';
+        setMessage('Excelente interpretação!', 'success');
+      } else {
+        button.classList.add('wrong');
+        mistakes++;
+        streak = 0;
+        score = Math.max(0, score - 35);
+        const correctBtn = buttons.find(btn => btn.textContent.trim().includes(item.answer));
+        if (correctBtn) correctBtn.classList.add('matched');
+        scenarioFeedback().textContent = `❌ Resposta correta: ${item.answer}. ${item.explanation}`;
+        scenarioFeedback().style.color = '#fee2e2';
+        setMessage('Quase! Leia a explicação e siga para a próxima.', 'error');
+      }
+
+      updateStats();
+      nextScenarioBtn().style.display = 'inline-flex';
+    }
+
+    function nextScenario() {
+      currentScenarioIndex++;
+      if (currentScenarioIndex >= scenarioQuestions.length) {
+        finishScenarioPhase();
+      } else {
+        renderScenario();
+      }
+    }
+
+    function finishScenarioPhase() {
+      clearInterval(timer);
+      gameActive = false;
+      const bonus = timeLeft * 6;
+      score += bonus;
+      updateStats();
+      finalScore.textContent = `Pontuação: ${score}`;
+      finalHits.textContent = `Acertos: ${hits}`;
+      finalMistakes.textContent = `Erros: ${mistakes}`;
+      endTitle.textContent = 'Você concluiu as 2 fases!';
+      endText.textContent = `Mandou bem! Além da fase de associação, você completou a fase de situações e ganhou ${bonus} pontos de bônus pelo tempo restante.`;
+      endScreen.classList.add('show');
+      phaseSection.style.display = 'none';
+      setMessage('🏆 Desafio completo! Você terminou as duas fases.', 'success');
+    }
+
+    nextScenarioBtn().addEventListener('click', nextScenario);
+
+    const originalStartGame = startGame;
+    startGame = function() {
+      currentPhase = 1;
+      phaseSection.style.display = 'none';
+      mainBoard.style.display = 'grid';
+      footerNote.textContent = 'Dica: selecione primeiro um conceito e depois a definição correspondente. Você ganha mais pontos quando acerta em sequência.';
+      endScreen.classList.remove('show');
+      originalStartGame();
+    };
+
+    const originalEndGame = endGame;
+    endGame = function(completed) {
+      if (completed && currentPhase === 1) {
+        currentPhase = 2;
+        buildScenarioPhase();
+      } else {
+        originalEndGame(completed);
+      }
+    };
+  </script>
+</body>
+</html>
